@@ -4,12 +4,12 @@
 \alias{alignMatrices}
 \title{alignMatrices}
 \usage{
-alignMatrices(Ms, ref, ls_mode)
+alignMatrices(Ms, ref, ls_mode = c("exact", "approx1", "approx2"))
 }
 \arguments{
 \item{Ms}{A list of matrices, all of same size DxK}
 
-\item{ref}{Either a reference matrix or "mean" to align on empirical mean}
+\item{ref}{A reference matrix to align other matrices with}
 
 \item{ls_mode}{How to compute the labels assignment: "exact" for exact algorithm
 (default, but might be time-consuming, complexity is O(K^3) ), or "approx1", or
@@ -23,4 +23,12 @@ The aligned list (of matrices), of same size as Ms
 \description{
 Align a set of parameters matrices, with potential permutations.
 }
+\examples{
+m1 <- matrix(c(1,1,0,0),ncol=2)
+m2 <- matrix(c(0,0,1,1),ncol=2)
+ref <- m1
+Ms <- list(m1, m2, m1, m2)
+a <- alignMatrices(Ms, ref, "exact")
+# a[[i]] is expected to contain m1 for all i
 
+}

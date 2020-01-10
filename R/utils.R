@@ -2,16 +2,20 @@
 #'
 #' Normalize a vector or a matrix (by columns), using euclidian norm
 #'
-#' @param X Vector or matrix to be normalized
+#' @param x Vector or matrix to be normalized
 #'
-#' @return The normalized matrix (1 column if X is a vector)
+#' @return The normalized matrix (1 column if x is a vector)
 #'
+#' @examples
+#' x <- matrix(c(1,2,-1,3), ncol=2)
+#' normalize(x) #column 1 is 1/sqrt(5) (1 2),
+#'              #and column 2 is 1/sqrt(10) (-1, 3)
 #' @export
-normalize = function(X)
+normalize = function(x)
 {
-	X = as.matrix(X)
-	norm2 = sqrt( colSums(X^2) )
-	sweep(X, 2, norm2, '/')
+  x = as.matrix(x)
+  norm2 = sqrt( colSums(x^2) )
+  sweep(x, 2, norm2, '/')
 }
 
 # Computes a tensor-vector product
@@ -23,11 +27,11 @@ normalize = function(X)
 #
 .T_I_I_w = function(Te, w)
 {
-	d = length(w)
-	Ma = matrix(0,nrow=d,ncol=d)
-	for (j in 1:d)
-		Ma = Ma + w[j] * Te[,,j]
-	Ma
+  d = length(w)
+  Ma = matrix(0,nrow=d,ncol=d)
+  for (j in 1:d)
+    Ma = Ma + w[j] * Te[,,j]
+  Ma
 }
 
 # Computes the second-order empirical moment between input X and output Y
@@ -39,11 +43,11 @@ normalize = function(X)
 #
 .Moments_M2 = function(X, Y)
 {
-	n = nrow(X)
-	d = ncol(X)
-	M2 = matrix(0,nrow=d,ncol=d)
-	matrix( .C("Moments_M2", X=as.double(X), Y=as.double(Y), pn=as.integer(n),
-		pd=as.integer(d), M2=as.double(M2), PACKAGE="morpheus")$M2, nrow=d, ncol=d)
+  n = nrow(X)
+  d = ncol(X)
+  M2 = matrix(0,nrow=d,ncol=d)
+  matrix( .C("Moments_M2", X=as.double(X), Y=as.double(Y), pn=as.integer(n),
+    pd=as.integer(d), M2=as.double(M2), PACKAGE="morpheus")$M2, nrow=d, ncol=d)
 }
 
 # Computes the third-order empirical moment between input X and output Y
@@ -55,11 +59,11 @@ normalize = function(X)
 #
 .Moments_M3 = function(X, Y)
 {
-	n = nrow(X)
-	d = ncol(X)
-	M3 = array(0,dim=c(d,d,d))
-	array( .C("Moments_M3", X=as.double(X), Y=as.double(Y), pn=as.integer(n),
-		pd=as.integer(d), M3=as.double(M3), PACKAGE="morpheus")$M3, dim=c(d,d,d) )
+  n = nrow(X)
+  d = ncol(X)
+  M3 = array(0,dim=c(d,d,d))
+  array( .C("Moments_M3", X=as.double(X), Y=as.double(Y), pn=as.integer(n),
+    pd=as.integer(d), M3=as.double(M3), PACKAGE="morpheus")$M3, dim=c(d,d,d) )
 }
 
 #' computeMoments
@@ -70,22 +74,27 @@ normalize = function(X)
 #'
 #' @return A list L where L[[i]] is the i-th cross-moment
 #'
+#' @examples
+#' X <- matrix(rnorm(100), ncol=2)
+#' Y <- rbinom(100, 1, .5)
+#' M <- computeMoments(X, Y)
+#'
 #' @export
 computeMoments = function(X, Y)
-	list( colMeans(Y * X), .Moments_M2(X,Y), .Moments_M3(X,Y) )
+  list( colMeans(Y * X), .Moments_M2(X,Y), .Moments_M3(X,Y) )
 
 # Find the optimal assignment (permutation) between two sets (minimize cost)
 #
-# @param distances The distances matrix, in columns (distances[i,j] is distance between i
-#   and j)
+# @param distances The distances matrix, in columns
+#   (distances[i,j] is distance between i and j)
 #
 # @return A permutation minimizing cost
 #
 .hungarianAlgorithm = function(distances)
 {
-	n = nrow(distances)
-	.C("hungarianAlgorithm", distances=as.double(distances), pn=as.integer(n),
-		assignment=integer(n), PACKAGE="morpheus")$assignment
+  n = nrow(distances)
+  .C("hungarianAlgorithm", distances=as.double(distances), pn=as.integer(n),
+    assignment=integer(n), PACKAGE="morpheus")$assignment
 }
 
 #' alignMatrices
@@ -93,7 +102,7 @@ computeMoments = function(X, Y)
 #' Align a set of parameters matrices, with potential permutations.
 #'
 #' @param Ms A list of matrices, all of same size DxK
-#' @param ref Either a reference matrix or "mean" to align on empirical mean
+#' @param ref A reference matrix to align other matrices with
 #' @param ls_mode How to compute the labels assignment: "exact" for exact algorithm
 #'   (default, but might be time-consuming, complexity is O(K^3) ), or "approx1", or
 #'   "approx2" to apply a greedy matching algorithm (heuristic) which for each column in
@@ -102,68 +111,68 @@ computeMoments = function(X, Y)
 #'
 #' @return The aligned list (of matrices), of same size as Ms
 #'
+#' @examples
+#' m1 <- matrix(c(1,1,0,0),ncol=2)
+#' m2 <- matrix(c(0,0,1,1),ncol=2)
+#' ref <- m1
+#' Ms <- list(m1, m2, m1, m2)
+#' a <- alignMatrices(Ms, ref, "exact")
+#' # a[[i]] is expected to contain m1 for all i
+#'
 #' @export
-alignMatrices = function(Ms, ref, ls_mode)
+alignMatrices = function(Ms, ref, ls_mode=c("exact","approx1","approx2"))
 {
-	if (!is.matrix(ref) && ref != "mean")
-		stop("ref: matrix or 'mean'")
-	if (!ls_mode %in% c("exact","approx1","approx2"))
-		stop("ls_mode in {'exact','approx1','approx2'}")
+  if (!is.matrix(ref) || any(is.na(ref)))
+    stop("ref: matrix, no NAs")
+  ls_mode <- match.arg(ls_mode)
 
-	K <- ncol(Ms[[1]])
-	if (is.character(ref)) #ref=="mean"
-		m_sum = Ms[[1]]
-	L <- length(Ms)
-	for (i in ifelse(is.character(ref),2,1):L)
-	{
-		m_ref = if (is.character(ref)) m_sum / (i-1) else ref
-		m = Ms[[i]] #shorthand
+  K <- ncol(Ms[[1]])
+  L <- length(Ms)
+  for (i in 1:L)
+  {
+    m = Ms[[i]] #shorthand
 
-		if (ls_mode == "exact")
-		{
-			#distances[i,j] = distance between m column i and ref column j
-			distances = apply( m_ref, 2, function(col) ( sqrt(colSums((m-col)^2)) ) )
-			assignment = .hungarianAlgorithm(distances)
-			col <- m[,assignment]
-			if (is.list(Ms)) Ms[[i]] <- col else Ms[,,i] <- col
-		}
-		else
-		{
-			# Greedy matching:
-			#   approx1: li[[i]][,j] is assigned to m[,k] minimizing dist(li[[i]][,j],m[,k'])
-			#   approx2: m[,j] is assigned to li[[i]][,k] minimizing dist(m[,j],li[[i]][,k'])
-			available_indices = 1:K
-			for (j in 1:K)
-			{
-				distances =
-					if (ls_mode == "approx1")
-					{
-						apply(as.matrix(m[,available_indices]), 2,
-							function(col) ( sqrt(sum((col - m_ref[,j])^2)) ) )
-					}
-					else #approx2
-					{
-						apply(as.matrix(m_ref[,available_indices]), 2,
-							function(col) ( sqrt(sum((col - m[,j])^2)) ) )
-					}
-				indMin = which.min(distances)
-				if (ls_mode == "approx1")
-				{
-					col <- m[ , available_indices[indMin] ]
-					if (is.list(Ms)) Ms[[i]][,j] <- col else Ms[,j,i] <- col
-				}
-				else #approx2
-				{
-					col <- available_indices[indMin]
-					if (is.list(Ms)) Ms[[i]][,col] <- m[,j] else Ms[,col,i] <- m[,j]
-				}
-				available_indices = available_indices[-indMin]
-			}
-		}
-
-		# Update current sum with "label-switched" li[[i]]
-		if (is.character(ref)) #ref=="mean"
-			m_sum = m_sum + Ms[[i]]
-	}
-	Ms
+    if (ls_mode == "exact")
+    {
+      #distances[i,j] = distance between m column i and ref column j
+      distances = apply( ref, 2, function(col) ( sqrt(colSums((m-col)^2)) ) )
+      assignment = .hungarianAlgorithm(distances)
+      col <- m[,assignment]
+      Ms[[i]] <- col
+    }
+    else
+    {
+      # Greedy matching:
+      #   approx1: li[[i]][,j] is assigned to m[,k] minimizing dist(li[[i]][,j],m[,k'])
+      #   approx2: m[,j] is assigned to li[[i]][,k] minimizing dist(m[,j],li[[i]][,k'])
+      available_indices = 1:K
+      for (j in 1:K)
+      {
+        distances =
+          if (ls_mode == "approx1")
+          {
+            apply(as.matrix(m[,available_indices]), 2,
+              function(col) ( sqrt(sum((col - ref[,j])^2)) ) )
+          }
+          else #approx2
+          {
+            apply(as.matrix(ref[,available_indices]), 2,
+              function(col) ( sqrt(sum((col - m[,j])^2)) ) )
+          }
+        indMin = which.min(distances)
+        if (ls_mode == "approx1")
+        {
+          col <- m[ , available_indices[indMin] ]
+          Ms[[i]][,j] <- col
+        }
+        else #approx2
+        {
+          col <- available_indices[indMin]
+          Ms[[i]][,col] <- m[,j]
+        }
+        available_indices = available_indices[-indMin]
+      }
+    }
+  }
+  Ms
 }

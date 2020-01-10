@@ -2,53 +2,53 @@
 % Please edit documentation in R/optimParams.R
 \name{optimParams}
 \alias{optimParams}
-\title{Optimize parameters}
+\title{Wrapper function for OptimParams class}
 \usage{
-optimParams(K, link = c("logit", "probit"), optargs = list())
+optimParams(X, Y, K, link = c("logit", "probit"), M = NULL)
 }
 \arguments{
+\item{X}{Data matrix of covariables}
+
+\item{Y}{Output as a binary vector}
+
 \item{K}{Number of populations.}
 
 \item{link}{The link type, 'logit' or 'probit'.}
 
-\item{optargs}{a list with optional arguments:
-\itemize{
-  \item 'M' : list of moments of order 1,2,3: will be computed if not provided.
-  \item 'X,Y' : input/output, mandatory if moments not given
-  \item 'exact': use exact formulas when available?
-}}
+\item{M}{the empirical cross-moments between X and Y (optional)}
 }
 \value{
-An object 'op' of class OptimParams, initialized so that \code{op$run(x0)}
-  outputs the list of optimized parameters
+An object 'op' of class OptimParams, initialized so that
+  \code{op$run(theta0)} outputs the list of optimized parameters
   \itemize{
     \item p: proportions, size K
     \item beta: regression matrix, size dxK
     \item b: intercepts, size K
   }
-  x0 is a vector containing respectively the K-1 first elements of p, then beta by
-  columns, and finally b: \code{x0 = c(p[1:(K-1)],as.double(beta),b)}.
+  theta0 is a list containing the initial parameters. Only beta is required
+  (p would be set to (1/K,...,1/K) and b to (0,...0)).
 }
 \description{
-Optimize the parameters of a mixture of logistic regressions model, possibly using
-\code{mu <- computeMu(...)} as a partial starting point.
+Wrapper function for OptimParams class
 }
 \examples{
 # Optimize parameters from estimated mu
-io = generateSampleIO(10000, 1/2, matrix(c(1,-2,3,1),ncol=2), c(0,0), "logit")
+io <- generateSampleIO(100,
+  1/2, matrix(c(1,-2,3,1),ncol=2), c(0,0), "logit")
 mu = computeMu(io$X, io$Y, list(K=2))
-M <- computeMoments(io$X, io$Y)
-o <- optimParams(2, "logit", list(M=M))
-x0 <- c(1/2, as.double(mu), c(0,0))
-par0 <- o$run(x0)
+o <- optimParams(io$X, io$Y, 2, "logit")
+\donttest{
+theta0 <- list(p=1/2, beta=mu, b=c(0,0))
+par0 <- o$run(theta0)
 # Compare with another starting point
-x1 <- c(1/2, 2*as.double(mu), c(0,0))
-par1 <- o$run(x1)
+theta1 <- list(p=1/2, beta=2*mu, b=c(0,0))
+par1 <- o$run(theta1)
+# Look at the function values at par0 and par1:
 o$f( o$linArgs(par0) )
-o$f( o$linArgs(par1) )
+o$f( o$linArgs(par1) )}
+
 }
 \seealso{
 \code{multiRun} to estimate statistics based on beta, and
   \code{generateSampleIO} for I/O random generation.
 }
-

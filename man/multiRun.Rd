@@ -4,13 +4,20 @@
 \alias{multiRun}
 \title{multiRun}
 \usage{
-multiRun(fargs, estimParams, prepareArgs = function(x, i) x, N = 10,
-  ncores = 3, agg = lapply, verbose = FALSE)
+multiRun(
+  fargs,
+  estimParams,
+  prepareArgs = function(x, i) x,
+  N = 10,
+  ncores = 3,
+  agg = lapply,
+  verbose = FALSE
+)
 }
 \arguments{
 \item{fargs}{List of arguments for the estimation functions}
 
-\item{estimParams}{List of nf function(s) to apply on fargs - shared signature}
+\item{estimParams}{List of nf function(s) to apply on fargs}
 
 \item{prepareArgs}{Prepare arguments for the functions inside estimParams}
 
@@ -26,31 +33,32 @@ multiRun(fargs, estimParams, prepareArgs = function(x, i) x, N = 10,
 A list of nf aggregates of N results (matrices).
 }
 \description{
-Estimate N times some parameters, outputs of some list of functions. This method is
-thus very generic, allowing typically bootstrap or Monte-Carlo estimations of matrices
-mu or beta. Passing a list of functions opens the possibility to compare them on a fair
-basis (exact same inputs). It's even possible to compare methods on some deterministic
-design of experiments.
+Estimate N times some parameters, outputs of some list of functions.
+This method is thus very generic, allowing typically bootstrap or
+Monte-Carlo estimations of matrices mu or beta.
+Passing a list of functions opens the possibility to compare them on a fair
+basis (exact same inputs). It's even possible to compare methods on some
+deterministic design of experiments.
 }
 \examples{
 \donttest{
 beta <- matrix(c(1,-2,3,1),ncol=2)
 
-# Bootstrap + computeMu, morpheus VS flexmix ; assumes fargs first 3 elts X,Y,K
+# Bootstrap + computeMu, morpheus VS flexmix
 io <- generateSampleIO(n=1000, p=1/2, beta=beta, b=c(0,0), "logit")
 mu <- normalize(beta)
-res <- multiRun(list(X=io$X,Y=io$Y,optargs=list(K=2,jd_nvects=0)), list(
+res <- multiRun(list(X=io$X,Y=io$Y,K=2), list(
   # morpheus
   function(fargs) {
     library(morpheus)
     ind <- fargs$ind
-    computeMu(fargs$X[ind,],fargs$Y[ind],fargs$optargs)
+    computeMu(fargs$X[ind,], fargs$Y[ind], list(K=fargs$K))
   },
   # flexmix
   function(fargs) {
     library(flexmix)
     ind <- fargs$ind
-    K <- fargs$optargs$K
+    K <- fargs$K
     dat = as.data.frame( cbind(fargs$Y[ind],fargs$X[ind,]) )
     out = refit( flexmix( cbind(V1, 1 - V1) ~ 0+., data=dat, k=K,
       model=FLXMRglm(family="binomial") ) )
@@ -66,35 +74,36 @@ res <- multiRun(list(X=io$X,Y=io$Y,optargs=list(K=2,jd_nvects=0)), list(
 for (i in 1:2)
   res[[i]] <- alignMatrices(res[[i]], ref=mu, ls_mode="exact")
 
-# Monte-Carlo + optimParams from X,Y, morpheus VS flexmix ; first args n,p,beta,b
-res <- multiRun(list(n=1000,p=1/2,beta=beta,b=c(0,0),optargs=list(link="logit")),list(
+# Monte-Carlo + optimParams from X,Y, morpheus VS flexmix
+res <- multiRun(list(n=1000,p=1/2,beta=beta,b=c(0,0),link="logit"),list(
   # morpheus
   function(fargs) {
     library(morpheus)
-    K <- fargs$optargs$K
-    mu <- computeMu(fargs$X, fargs$Y, fargs$optargs)
-    V <- list( p=rep(1/K,K-1), beta=mu, b=c(0,0) )
-    optimParams(V,fargs$optargs)$beta
+    K <- fargs$K
+    mu <- computeMu(fargs$X, fargs$Y, list(K=fargs$K))
+    o <- optimParams(fargs$X, fargs$Y, fargs$K, fargs$link, fargs$M)
+    o$run(list(beta=mu))$beta
   },
   # flexmix
   function(fargs) {
     library(flexmix)
-    K <- fargs$optargs$K
+    K <- fargs$K
     dat <- as.data.frame( cbind(fargs$Y,fargs$X) )
     out <- refit( flexmix( cbind(V1, 1 - V1) ~ 0+., data=dat, k=K,
       model=FLXMRglm(family="binomial") ) )
-    sapply( seq_len(K), function(i) as.double( out@components[[1]][[i]][,1] ) )
+    sapply( seq_len(K), function(i)
+      as.double( out@components[[1]][[i]][,1] ) )
   } ),
   prepareArgs = function(fargs,index) {
     library(morpheus)
-    io = generateSampleIO(fargs$n, fargs$p, fargs$beta, fargs$b, fargs$optargs$link)
+    io = generateSampleIO(fargs$n, fargs$p, fargs$beta, fargs$b, fargs$link)
     fargs$X = io$X
     fargs$Y = io$Y
-    fargs$optargs$K = ncol(fargs$beta)
-    fargs$optargs$M = computeMoments(io$X,io$Y)
+    fargs$K = ncol(fargs$beta)
+    fargs$link = fargs$link
+    fargs$M = computeMoments(io$X,io$Y)
     fargs
   }, N=10, ncores=3)
 for (i in 1:2)
   res[[i]] <- alignMatrices(res[[i]], ref=beta, ls_mode="exact")}
 }
-

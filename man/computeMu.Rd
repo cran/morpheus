@@ -18,7 +18,7 @@ computeMu(X, Y, optargs = list())
   \item 'jd_nvects', number of random vectors for joint-diagonalization
     (or 0 for p=d, canonical basis by default)
   \item 'M', moments of order 1,2,3: will be computed if not provided.
-  \item 'K', number of populations (estimated with ranks of M2 if not given)
+  \item 'K', number of populations (estimated with rank of M2 if not given)
 }}
 }
 \value{
@@ -31,9 +31,9 @@ logistic regressions models, with a spectral method described in the package vig
 \examples{
 io = generateSampleIO(10000, 1/2, matrix(c(1,0,0,1),ncol=2), c(0,0), "probit")
 mu = computeMu(io$X, io$Y, list(K=2)) #or just X and Y for estimated K
+
 }
 \seealso{
 \code{multiRun} to estimate statistics based on mu,
   and \code{generateSampleIO} for I/O random generation.
 }
-

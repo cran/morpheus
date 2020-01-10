@@ -4,17 +4,30 @@
 \alias{plotCoefs}
 \title{plotCoefs}
 \usage{
-plotCoefs(mr, params)
+plotCoefs(mr, params, ...)
 }
 \arguments{
-\item{mr}{Output of multiRun(), list of lists of functions results}
+\item{mr}{List of parameters matrices}
 
-\item{params}{True value of parameters matrix}
+\item{params}{True value of the parameters matrix}
+
+\item{...}{Additional graphical parameters}
 }
 \description{
-Draw coefs estimations + standard deviations
+Draw a graph of (averaged) coefficients estimations with their standard,
+deviations ordered by mean values.
+Note that the drawing does not correspond to a function; it is just a
+convenient way to visualize the estimated parameters.
 }
 \examples{
-#See example in ?plotHist
-}
+\donttest{
+beta <- matrix(c(1,-2,3,1),ncol=2)
+mr <- multiRun(...) #see bootstrap example in ?multiRun
+                    #mr[[i]] is a list of estimated parameters matrices
+mu <- normalize(beta)
+for (i in 1:2)
+  mr[[i]] <- alignMatrices(res[[i]], ref=mu, ls_mode="exact")
+params <- rbind( c(.5,.5), beta, c(0,0) ) #p, beta, b stacked in a matrix
+plotCoefs(mr[[1]], params)}
 
+}

@@ -17,4 +17,9 @@ A list L where L[[i]] is the i-th cross-moment
 \description{
 Compute cross-moments of order 1,2,3 from X,Y
 }
+\examples{
+X <- matrix(rnorm(100), ncol=2)
+Y <- rbinom(100, 1, .5)
+M <- computeMoments(X, Y)
 
+}

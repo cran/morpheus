@@ -9,7 +9,7 @@ generateSampleIO(n, p, beta, b, link)
 \arguments{
 \item{n}{Number of individuals}
 
-\item{p}{Vector of K-1 populations relative proportions (sum <= 1)}
+\item{p}{Vector of K(-1) populations relative proportions (sum (<)= 1)}
 
 \item{beta}{Vectors of model parameters for each population, of size dxK}
 
@@ -30,4 +30,10 @@ Generate input matrix X of size nxd and binary output of size n, where Y is subd
 into K groups of proportions p. Inside one group, the probability law P(Y=1) is
 described by the corresponding column parameter in the matrix beta + intercept b.
 }
+\examples{
+# K = 3 so we give first two components of p: 0.3 and 0.3 (p[3] = 0.4)
+io <- generateSampleIO(1000, c(.3,.3),
+  matrix(c(1,3,-1,1,2,1),ncol=3), c(.5,-1,0), "logit")
+io$index[1] #number of the group of X[1,] and Y[1] (in 1...K)
 
+}

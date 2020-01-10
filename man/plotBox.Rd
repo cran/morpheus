@@ -4,7 +4,7 @@
 \alias{plotBox}
 \title{plotBox}
 \usage{
-plotBox(mr, x, y)
+plotBox(mr, x, y, ...)
 }
 \arguments{
 \item{mr}{Output of multiRun(), list of lists of functions results}
@@ -12,11 +12,20 @@ plotBox(mr, x, y)
 \item{x}{Row index of the element inside the aggregated parameter}
 
 \item{y}{Column index of the element inside the aggregated parameter}
+
+\item{...}{Additional graphical parameters (xlab, ylab, ...)}
 }
 \description{
-Draw boxplot
+Draw compared boxplots of a single parameter (scalar)
 }
 \examples{
-#See example in ?plotHist
-}
+\donttest{
+beta <- matrix(c(1,-2,3,1),ncol=2)
+mr <- multiRun(...) #see bootstrap example in ?multiRun
+                    #mr[[i]] is a list of estimated parameters matrices
+mu <- normalize(beta)
+for (i in 1:2)
+  mr[[i]] <- alignMatrices(res[[i]], ref=mu, ls_mode="exact")
+plotBox(mr, 2, 1) #second row, first column}
 
+}

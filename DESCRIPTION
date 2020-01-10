@@ -5,20 +5,20 @@ Description: Mixture of logistic regressions parameters (H)estimation with
     of binary outputs, and return parameters according to the GLMs mixture model
     (General Linear Model). For more details see chapter 3 in the PhD thesis of
 		Mor-Absa Loum: <http://www.theses.fr/s156435>, available here
-		<https://www.math.u-psud.fr/~loum/IMG/pdf/these.compressed-2.pdf>.
-Version: 0.2-0
+		<https://tel.archives-ouvertes.fr/tel-01877796/document>.
+Version: 1.0-0
 Author: Benjamin Auder <Benjamin.Auder@u-psud.fr> [aut,cre],
     Mor-Absa Loum <Mor-Absa.Loum@u-psud.fr> [aut]
 Maintainer: Benjamin Auder <Benjamin.Auder@u-psud.fr>
-Depends: R (>= 3.0.0),
+Depends: R (>= 3.5.0),
 Imports: MASS, jointDiag, methods, pracma
-Suggests: devtools, flexmix, parallel, testthat, roxygen2, tensor,
-        nloptr
+Suggests: devtools, flexmix, parallel, testthat, roxygen2
 License: MIT + file LICENSE
-RoxygenNote: 5.0.1
+RoxygenNote: 7.0.2
+URL: https://github.com/yagu0/morpheus
 Collate: 'utils.R' 'A_NAMESPACE.R' 'computeMu.R' 'multiRun.R'
         'optimParams.R' 'plot.R' 'sampleIO.R'
 NeedsCompilation: yes
-Packaged: 2018-06-12 12:24:17 UTC; auder
+Packaged: 2020-01-10 10:16:21 UTC; auder
 Repository: CRAN
-Date/Publication: 2018-06-14 18:48:14 UTC
+Date/Publication: 2020-01-10 10:30:11 UTC

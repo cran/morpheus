@@ -4,15 +4,19 @@
 \alias{normalize}
 \title{normalize}
 \usage{
-normalize(X)
+normalize(x)
 }
 \arguments{
-\item{X}{Vector or matrix to be normalized}
+\item{x}{Vector or matrix to be normalized}
 }
 \value{
-The normalized matrix (1 column if X is a vector)
+The normalized matrix (1 column if x is a vector)
 }
 \description{
 Normalize a vector or a matrix (by columns), using euclidian norm
 }
-
+\examples{
+x <- matrix(c(1,2,-1,3), ncol=2)
+normalize(x) #column 1 is 1/sqrt(5) (1 2),
+             #and column 2 is 1/sqrt(10) (-1, 3)
+}
