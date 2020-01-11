@@ -1,4 +1,4 @@
-dbe07d44026ddf0a9aa2a42b015cd2cb *DESCRIPTION
+808c6f9e75e9b0b25648465354e99cb6 *DESCRIPTION
 183e445fd0866c2b6931605fd80ab5c8 *LICENSE
 22ed59669e8de35de7c7640b253dee04 *NAMESPACE
 297c332f5ffd49c37088880749aa85d2 *R/A_NAMESPACE.R
@@ -8,7 +8,7 @@ dbe07d44026ddf0a9aa2a42b015cd2cb *DESCRIPTION
 bb4f03fd508266f17d089d689b138a90 *R/plot.R
 8a31bc2052cf8d2237b151efaeb1826a *R/sampleIO.R
 eb41db2723739376ab25010b08933f6f *R/utils.R
-d9dc3293f746470def3204248ba3c6db *build/partial.rdb
+5885076c95763eeb082a140e9d450f83 *build/partial.rdb
 64ca514f661ba645a49369d736de0d7b *man/alignMatrices.Rd
 d8b8ec5f3760a704782c2b5de5ec3181 *man/computeMoments.Rd
 0cb5cdd4f0e423cc79ffc9ba6f710a62 *man/computeMu.Rd
@@ -20,7 +20,7 @@ e012814967c7bbb52ed5f531906801f7 *man/optimParams.Rd
 08a162d4e5a074824ec354326e958eb2 *man/plotBox.Rd
 d1f9f65d077b961d23e11418ce3fc543 *man/plotCoefs.Rd
 7e8f0894daf42c038bff33942f35cedf *man/plotHist.Rd
-5351bd79bbd482f9f323169b7b6fc81d *src/Makevars
+6ac0e5d7555f419b9d73163348b0d392 *src/Makevars
 342d0c2dd2b2b75130d3ef811faa0aca *src/functions.c
 8c18d56635eed0f00abbdfcb6158bc3b *src/hungarian.c
 19cf630ad4156a0ea2bbeab880aac238 *src/morpheus_init.c

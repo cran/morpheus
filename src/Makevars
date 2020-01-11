@@ -1,4 +1,4 @@
 # Override R weird defaults:
 # https://stackoverflow.com/questions/23414448/r-makevars-file-to-overwrite-r-cmds-default-g-options
-%.o: %.c
-	$(CC) -std=c11 -I"$(R_INCLUDE_DIR)" -DNDEBUG -fPIC -O2 -c $< -o $@
+#%.o: %.c
+#	$(CC) -std=c11 -I"$(R_INCLUDE_DIR)" -DNDEBUG -fPIC -O2 -c $< -o $@
