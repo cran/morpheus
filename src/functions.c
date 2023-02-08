@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <omp.h>
 
 // Index matrix (by columns)
 #define mi(i, j, d1, d2) (j*d1 + i)
@@ -50,9 +51,9 @@ void Moments_M3(double* X, double* Y, int* pn, int* pd, double* M3)
 
 // W = 1/N sum( t(g(Zi,theta)) g(Zi,theta) )
 // with g(Zi, theta) = i-th contribution to all moments (size dim) - real moments
-void Compute_Omega(double* X, int* Y, double* M, int* pn, int* pd, double* W)
+void Compute_Omega(double* X, int* Y, double* M, int* pnc, int* pn, int* pd, double* W)
 {
-  int n=*pn, d=*pd;
+  int nc=*pnc, n=*pn, d=*pd;
   int dim = d + d*d + d*d*d;
   //double* W = (double*)malloc(dim*dim*sizeof(double));
 
@@ -63,6 +64,9 @@ void Compute_Omega(double* X, int* Y, double* M, int* pn, int* pd, double* W)
       W[j*dim+k] = 0.0;
   }
   double* g = (double*)malloc(dim*sizeof(double));
+  // TODO: stabilize this (for now, random result)
+//  omp_set_num_threads(nc >= 1 ? nc : omp_get_num_procs());
+//  #pragma omp parallel for
   for (int i=0; i<n; i++)
   {
     // g == gi:
@@ -94,9 +98,25 @@ void Compute_Omega(double* X, int* Y, double* M, int* pn, int* pd, double* W)
     // Add 1/n t(gi) %*% gi to W
     for (int j=0; j<dim; j++)
     {
-      for (int k=0; k<dim; k++)
-        W[j*dim+k] += g[j] * g[k] / n;
+      // This final nested loop is very costly. Some basic optimisations:
+      double gj = g[j];
+      int baseIdx = j * dim;
+      #pragma GCC unroll 32
+      for (int k=j; k>=0; k--)
+        W[baseIdx+k] += gj * g[k];
     }
+  }
+  // Normalize W: x 1/n
+  for (int j=0; j<dim; j++)
+  {
+    for (int k=j; k<dim; k++)
+      W[mi(j,k,dim,dim)] /= n;
+  }
+  // Symmetrize W: W[k,j] = W[j,k] for k > j
+  for (int j=0; j<dim; j++)
+  {
+    for (int k=j+1; k<dim; k++)
+      W[mi(k,j,dim,dim)] = W[mi(j,k,dim,dim)];
   }
   free(g);
 }

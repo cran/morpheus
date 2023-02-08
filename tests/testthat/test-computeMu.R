@@ -1,5 +1,3 @@
-context("computeMu")
-
 test_that("on input of sufficient size, beta/||beta|| is estimated accurately enough",
 {
   n <- 100000
@@ -28,8 +26,8 @@ test_that("on input of sufficient size, beta/||beta|| is estimated accurately en
       diff_norm <- norm(mu_ref - mu_aligned)
       cat(diff_norm,"\n")
 
-      #NOTE: 0.5 is loose threshold, but values around 0.3 are expected...
-      expect_that( diff_norm, is_less_than(0.5) )
+      # NOTE: 0.5 is loose threshold, but values around 0.3 are expected...
+      expect_lt( diff_norm, 0.5 )
     }
   }
 })

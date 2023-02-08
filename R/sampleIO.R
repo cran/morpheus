@@ -4,6 +4,8 @@
 #' into K groups of proportions p. Inside one group, the probability law P(Y=1) is
 #' described by the corresponding column parameter in the matrix beta + intercept b.
 #'
+#' @name generateSampleIO
+#'
 #' @param n Number of individuals
 #' @param p Vector of K(-1) populations relative proportions (sum (<)= 1)
 #' @param beta Vectors of model parameters for each population, of size dxK
@@ -24,10 +26,10 @@
 #' io$index[1] #number of the group of X[1,] and Y[1] (in 1...K)
 #'
 #' @export
-generateSampleIO = function(n, p, beta, b, link)
+generateSampleIO <- function(n, p, beta, b, link)
 {
   # Check arguments
-  tryCatch({n = as.integer(n)}, error=function(e) stop("Cannot convert n to integer"))
+  tryCatch({n <- as.integer(n)}, error=function(e) stop("Cannot convert n to integer"))
   if (length(n) > 1)
     warning("n is a vector but should be scalar: only first element used")
   if (n <= 0)

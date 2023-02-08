@@ -29,8 +29,8 @@ Estimate the normalized columns mu of the beta matrix parameter in a mixture of
 logistic regressions models, with a spectral method described in the package vignette.
 }
 \examples{
-io = generateSampleIO(10000, 1/2, matrix(c(1,0,0,1),ncol=2), c(0,0), "probit")
-mu = computeMu(io$X, io$Y, list(K=2)) #or just X and Y for estimated K
+io <- generateSampleIO(10000, 1/2, matrix(c(1,0,0,1),ncol=2), c(0,0), "probit")
+mu <- computeMu(io$X, io$Y, list(K=2)) #or just X and Y for estimated K
 
 }
 \seealso{

@@ -41,7 +41,7 @@ basis (exact same inputs). It's even possible to compare methods on some
 deterministic design of experiments.
 }
 \examples{
-\donttest{
+\dontrun{
 beta <- matrix(c(1,-2,3,1),ncol=2)
 
 # Bootstrap + computeMu, morpheus VS flexmix
@@ -59,8 +59,8 @@ res <- multiRun(list(X=io$X,Y=io$Y,K=2), list(
     library(flexmix)
     ind <- fargs$ind
     K <- fargs$K
-    dat = as.data.frame( cbind(fargs$Y[ind],fargs$X[ind,]) )
-    out = refit( flexmix( cbind(V1, 1 - V1) ~ 0+., data=dat, k=K,
+    dat <- as.data.frame( cbind(fargs$Y[ind],fargs$X[ind,]) )
+    out <- refit( flexmix( cbind(V1, 1 - V1) ~ 0+., data=dat, k=K,
       model=FLXMRglm(family="binomial") ) )
     normalize( matrix(out@coef[1:(ncol(fargs$X)*K)], ncol=K) )
   } ),
@@ -75,7 +75,7 @@ for (i in 1:2)
   res[[i]] <- alignMatrices(res[[i]], ref=mu, ls_mode="exact")
 
 # Monte-Carlo + optimParams from X,Y, morpheus VS flexmix
-res <- multiRun(list(n=1000,p=1/2,beta=beta,b=c(0,0),link="logit"),list(
+res <- multiRun(list(n=1000,p=1/2,beta=beta,b=c(0,0),link="logit"), list(
   # morpheus
   function(fargs) {
     library(morpheus)
@@ -89,19 +89,19 @@ res <- multiRun(list(n=1000,p=1/2,beta=beta,b=c(0,0),link="logit"),list(
     library(flexmix)
     K <- fargs$K
     dat <- as.data.frame( cbind(fargs$Y,fargs$X) )
-    out <- refit( flexmix( cbind(V1, 1 - V1) ~ 0+., data=dat, k=K,
+    out <- refit( flexmix( cbind(V1, 1 - V1) ~ ., data=dat, k=K,
       model=FLXMRglm(family="binomial") ) )
     sapply( seq_len(K), function(i)
-      as.double( out@components[[1]][[i]][,1] ) )
+      as.double( out@components[[1]][[i]][2:(1+ncol(fargs$X)),1] ) )
   } ),
   prepareArgs = function(fargs,index) {
     library(morpheus)
-    io = generateSampleIO(fargs$n, fargs$p, fargs$beta, fargs$b, fargs$link)
-    fargs$X = io$X
-    fargs$Y = io$Y
-    fargs$K = ncol(fargs$beta)
-    fargs$link = fargs$link
-    fargs$M = computeMoments(io$X,io$Y)
+    io <- generateSampleIO(fargs$n, fargs$p, fargs$beta, fargs$b, fargs$link)
+    fargs$X <- io$X
+    fargs$Y <- io$Y
+    fargs$K <- ncol(fargs$beta)
+    fargs$link <- fargs$link
+    fargs$M <- computeMoments(io$X,io$Y)
     fargs
   }, N=10, ncores=3)
 for (i in 1:2)

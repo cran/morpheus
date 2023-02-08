@@ -1,5 +1,3 @@
-context("Moments")
-
 test_that("both versions of Moments_Mi agree on various inputs",
 {
   for (n in c(20,200))

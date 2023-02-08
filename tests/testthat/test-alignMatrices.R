@@ -1,5 +1,3 @@
-context("alignMatrices")
-
 # Helper to generate a random series of matrices to align
 .generateMatrices = function(d, K, N, noise)
 {
@@ -59,6 +57,6 @@ test_that("labelSwitchingAlign correctly aligns noisy parameters",
 
     # 3] Check alignment
     for (j in 2:N)
-      expect_that( norm(aligned[[j]] - Ms[[1]]), is_less_than(max_error) )
+      expect_lt( norm(aligned[[j]] - Ms[[1]]), max_error )
   }
 })

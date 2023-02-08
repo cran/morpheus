@@ -1,5 +1,3 @@
-context("hungarianAlgorithm")
-
 test_that("HungarianAlgorithm provides the correct answer on various inputs",
 {
   for (n in c(2,3,10,50))

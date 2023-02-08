@@ -19,7 +19,7 @@ plotHist(mr, x, y, ...)
 Plot compared histograms of a single parameter (scalar)
 }
 \examples{
-\donttest{
+\dontrun{
 beta <- matrix(c(1,-2,3,1),ncol=2)
 mr <- multiRun(...) #see bootstrap example in ?multiRun
                     #mr[[i]] is a list of estimated parameters matrices

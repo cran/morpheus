@@ -20,7 +20,7 @@ Note that the drawing does not correspond to a function; it is just a
 convenient way to visualize the estimated parameters.
 }
 \examples{
-\donttest{
+\dontrun{
 beta <- matrix(c(1,-2,3,1),ncol=2)
 mr <- multiRun(...) #see bootstrap example in ?multiRun
                     #mr[[i]] is a list of estimated parameters matrices

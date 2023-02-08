@@ -22,13 +22,15 @@
 #'
 #' Plot compared histograms of a single parameter (scalar)
 #'
+#' @name plotHist
+#'
 #' @param mr Output of multiRun(), list of lists of functions results
 #' @param x Row index of the element inside the aggregated parameter
 #' @param y Column index of the element inside the aggregated parameter
 #' @param ... Additional graphical parameters (xlab, ylab, ...)
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' beta <- matrix(c(1,-2,3,1),ncol=2)
 #' mr <- multiRun(...) #see bootstrap example in ?multiRun
 #'                     #mr[[i]] is a list of estimated parameters matrices
@@ -41,7 +43,7 @@
 plotHist <- function(mr, x, y, ...)
 {
   params <- .extractParam(mr, x, y)
-  L = length(params)
+  L <- length(params)
   # Plot histograms side by side
   par(mfrow=c(1,L), cex.axis=1.5, cex.lab=1.5, mar=c(4.7,5,1,1))
   args <- list(...)
@@ -53,14 +55,21 @@ plotHist <- function(mr, x, y, ...)
   }
 }
 
+# NOTE: roxygen2 bug, "@inheritParams plotHist" fails in next header:
+
 #' plotBox
 #'
 #' Draw compared boxplots of a single parameter (scalar)
 #'
-#' @inheritParams plotHist
+#' @name plotBox
+#'
+#' @param mr Output of multiRun(), list of lists of functions results
+#' @param x Row index of the element inside the aggregated parameter
+#' @param y Column index of the element inside the aggregated parameter
+#' @param ... Additional graphical parameters (xlab, ylab, ...)
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' beta <- matrix(c(1,-2,3,1),ncol=2)
 #' mr <- multiRun(...) #see bootstrap example in ?multiRun
 #'                     #mr[[i]] is a list of estimated parameters matrices
@@ -73,7 +82,7 @@ plotHist <- function(mr, x, y, ...)
 plotBox <- function(mr, x, y, ...)
 {
   params <- .extractParam(mr, x, y)
-  L = length(params)
+  L <- length(params)
   # Plot boxplots side by side
   par(mfrow=c(1,L), cex.axis=1.5, cex.lab=1.5, mar=c(4.7,5,1,1))
   args <- list(...)
@@ -91,12 +100,14 @@ plotBox <- function(mr, x, y, ...)
 #' Note that the drawing does not correspond to a function; it is just a
 #' convenient way to visualize the estimated parameters.
 #'
+#' @name plotCoefs
+#'
 #' @param mr List of parameters matrices
 #' @param params True value of the parameters matrix
 #' @param ... Additional graphical parameters
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' beta <- matrix(c(1,-2,3,1),ncol=2)
 #' mr <- multiRun(...) #see bootstrap example in ?multiRun
 #'                     #mr[[i]] is a list of estimated parameters matrices

@@ -1,10 +1,15 @@
+#' optimParams
+#'
 #' Wrapper function for OptimParams class
+#'
+#' @name optimParams
 #'
 #' @param X Data matrix of covariables
 #' @param Y Output as a binary vector
 #' @param K Number of populations.
 #' @param link The link type, 'logit' or 'probit'.
 #' @param M the empirical cross-moments between X and Y (optional)
+#' @param nc Number of cores (default: 0 to use all)
 #'
 #' @return An object 'op' of class OptimParams, initialized so that
 #'   \code{op$run(theta0)} outputs the list of optimized parameters
@@ -23,7 +28,7 @@
 #' # Optimize parameters from estimated mu
 #' io <- generateSampleIO(100,
 #'   1/2, matrix(c(1,-2,3,1),ncol=2), c(0,0), "logit")
-#' mu = computeMu(io$X, io$Y, list(K=2))
+#' mu <- computeMu(io$X, io$Y, list(K=2))
 #' o <- optimParams(io$X, io$Y, 2, "logit")
 #' \donttest{
 #' theta0 <- list(p=1/2, beta=mu, b=c(0,0))
@@ -36,7 +41,7 @@
 #' o$f( o$linArgs(par1) )}
 #'
 #' @export
-optimParams <- function(X, Y, K, link=c("logit","probit"), M=NULL)
+optimParams <- function(X, Y, K, link=c("logit","probit"), M=NULL, nc=0)
 {
   # Check arguments
   if (!is.matrix(X) || any(is.na(X)))
@@ -44,8 +49,8 @@ optimParams <- function(X, Y, K, link=c("logit","probit"), M=NULL)
   if (!is.numeric(Y) || any(is.na(Y)) || any(Y!=0 & Y!=1))
     stop("Y: binary vector with 0 and 1 only")
   link <- match.arg(link)
-  if (!is.numeric(K) || K!=floor(K) || K < 2)
-    stop("K: integer >= 2")
+  if (!is.numeric(K) || K!=floor(K) || K < 2 || K > ncol(X))
+    stop("K: integer >= 2, <= d")
 
   if (is.null(M))
   {
@@ -61,7 +66,7 @@ optimParams <- function(X, Y, K, link=c("logit","probit"), M=NULL)
 
   # Build and return optimization algorithm object
   methods::new("OptimParams", "li"=link, "X"=X,
-    "Y"=as.integer(Y), "K"=as.integer(K), "Mhat"=as.double(M))
+    "Y"=as.integer(Y), "K"=as.integer(K), "Mhat"=as.double(M), "nc"=as.integer(nc))
 }
 
 # Encapsulated optimization for p (proportions), beta and b (regression parameters)
@@ -76,6 +81,7 @@ optimParams <- function(X, Y, K, link=c("logit","probit"), M=NULL)
 # @field K Number of populations
 # @field n Number of sample points
 # @field d Number of dimensions
+# @field nc Number of cores (OpenMP //)
 # @field W Weights matrix (initialized at identity)
 #
 setRefClass(
@@ -91,6 +97,7 @@ setRefClass(
     K = "integer",
     n = "integer",
     d = "integer",
+    nc = "integer",
     # Weights matrix (generalized least square)
     W = "matrix"
   ),
@@ -102,7 +109,7 @@ setRefClass(
 
       callSuper(...)
       if (!hasArg("X") || !hasArg("Y") || !hasArg("K")
-        || !hasArg("li") || !hasArg("Mhat"))
+        || !hasArg("li") || !hasArg("Mhat") || !hasArg("nc"))
       {
         stop("Missing arguments")
       }
@@ -141,7 +148,7 @@ setRefClass(
       M <- Moments(theta)
       Omega <- matrix( .C("Compute_Omega",
         X=as.double(X), Y=as.integer(Y), M=as.double(M),
-        pn=as.integer(n), pd=as.integer(d),
+        pnc=as.integer(nc), pn=as.integer(n), pd=as.integer(d),
         W=as.double(W), PACKAGE="morpheus")$W, nrow=dd, ncol=dd )
       MASS::ginv(Omega)
     },
@@ -250,7 +257,8 @@ setRefClass(
       res
     },
 
-    run = function(theta0)
+    # userW allows to bypass the W optimization by giving a W matrix
+    run = function(theta0, userW=NULL)
     {
       "Run optimization from theta0 with solver..."
 
@@ -270,19 +278,21 @@ setRefClass(
       {
         stop("theta0$p: length K-1, no NA, positive integers, sum to <= 1")
       }
-      if (is.null(theta0$b))
+      # NOTE: [["b"]] instead of $b because $b would match $beta (in pkg-cran)
+      if (is.null(theta0[["b"]]))
         theta0$b = rep(0, K)
       else if (!is.numeric(theta0$b) || length(theta0$b) != K || any(is.na(theta0$b)))
         stop("theta0$b: length K, no NA")
 
       # (Re)Set W to identity, to allow several run from the same object
-      W <<- diag(d+d^2+d^3)
+      W <<- if (is.null(userW)) diag(d+d^2+d^3) else userW
 
-      loopMax <- 2 #TODO: loopMax = 3 ? Seems not improving...
+      # NOTE: loopMax = 3 seems to not improve the final results.
+      loopMax <- ifelse(is.null(userW), 2, 1)
       x_init <- linArgs(theta0)
       for (loop in 1:loopMax)
       {
-        op_res = constrOptim( x_init, .self$f, .self$grad_f,
+        op_res <- constrOptim( x_init, .self$f, .self$grad_f,
           ui=cbind(
             rbind( rep(-1,K-1), diag(K-1) ),
             matrix(0, nrow=K, ncol=(d+1)*K) ),

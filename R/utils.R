@@ -11,10 +11,10 @@
 #' normalize(x) #column 1 is 1/sqrt(5) (1 2),
 #'              #and column 2 is 1/sqrt(10) (-1, 3)
 #' @export
-normalize = function(x)
+normalize <- function(x)
 {
-  x = as.matrix(x)
-  norm2 = sqrt( colSums(x^2) )
+  x <- as.matrix(x)
+  norm2 <- sqrt( colSums(x^2) )
   sweep(x, 2, norm2, '/')
 }
 
@@ -25,12 +25,12 @@ normalize = function(x)
 #
 # @return Matrix of size dxd
 #
-.T_I_I_w = function(Te, w)
+.T_I_I_w <- function(Te, w)
 {
-  d = length(w)
-  Ma = matrix(0,nrow=d,ncol=d)
+  d <- length(w)
+  Ma <- matrix(0,nrow=d,ncol=d)
   for (j in 1:d)
-    Ma = Ma + w[j] * Te[,,j]
+    Ma <- Ma + w[j] * Te[,,j]
   Ma
 }
 
@@ -41,11 +41,11 @@ normalize = function(x)
 #
 # @return Matrix of size dxd
 #
-.Moments_M2 = function(X, Y)
+.Moments_M2 <- function(X, Y)
 {
-  n = nrow(X)
-  d = ncol(X)
-  M2 = matrix(0,nrow=d,ncol=d)
+  n <- nrow(X)
+  d <- ncol(X)
+  M2 <- matrix(0,nrow=d,ncol=d)
   matrix( .C("Moments_M2", X=as.double(X), Y=as.double(Y), pn=as.integer(n),
     pd=as.integer(d), M2=as.double(M2), PACKAGE="morpheus")$M2, nrow=d, ncol=d)
 }
@@ -57,11 +57,11 @@ normalize = function(x)
 #
 # @return Array of size dxdxd
 #
-.Moments_M3 = function(X, Y)
+.Moments_M3 <- function(X, Y)
 {
-  n = nrow(X)
-  d = ncol(X)
-  M3 = array(0,dim=c(d,d,d))
+  n <- nrow(X)
+  d <- ncol(X)
+  M3 <- array(0,dim=c(d,d,d))
   array( .C("Moments_M3", X=as.double(X), Y=as.double(Y), pn=as.integer(n),
     pd=as.integer(d), M3=as.double(M3), PACKAGE="morpheus")$M3, dim=c(d,d,d) )
 }
@@ -90,9 +90,9 @@ computeMoments = function(X, Y)
 #
 # @return A permutation minimizing cost
 #
-.hungarianAlgorithm = function(distances)
+.hungarianAlgorithm <- function(distances)
 {
-  n = nrow(distances)
+  n <- nrow(distances)
   .C("hungarianAlgorithm", distances=as.double(distances), pn=as.integer(n),
     assignment=integer(n), PACKAGE="morpheus")$assignment
 }
@@ -120,7 +120,7 @@ computeMoments = function(X, Y)
 #' # a[[i]] is expected to contain m1 for all i
 #'
 #' @export
-alignMatrices = function(Ms, ref, ls_mode=c("exact","approx1","approx2"))
+alignMatrices <- function(Ms, ref, ls_mode=c("exact","approx1","approx2"))
 {
   if (!is.matrix(ref) || any(is.na(ref)))
     stop("ref: matrix, no NAs")
@@ -130,7 +130,7 @@ alignMatrices = function(Ms, ref, ls_mode=c("exact","approx1","approx2"))
   L <- length(Ms)
   for (i in 1:L)
   {
-    m = Ms[[i]] #shorthand
+    m <- Ms[[i]] #shorthand
 
     if (ls_mode == "exact")
     {

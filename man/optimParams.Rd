@@ -2,9 +2,9 @@
 % Please edit documentation in R/optimParams.R
 \name{optimParams}
 \alias{optimParams}
-\title{Wrapper function for OptimParams class}
+\title{optimParams}
 \usage{
-optimParams(X, Y, K, link = c("logit", "probit"), M = NULL)
+optimParams(X, Y, K, link = c("logit", "probit"), M = NULL, nc = 0)
 }
 \arguments{
 \item{X}{Data matrix of covariables}
@@ -16,6 +16,8 @@ optimParams(X, Y, K, link = c("logit", "probit"), M = NULL)
 \item{link}{The link type, 'logit' or 'probit'.}
 
 \item{M}{the empirical cross-moments between X and Y (optional)}
+
+\item{nc}{Number of cores (default: 0 to use all)}
 }
 \value{
 An object 'op' of class OptimParams, initialized so that
@@ -35,7 +37,7 @@ Wrapper function for OptimParams class
 # Optimize parameters from estimated mu
 io <- generateSampleIO(100,
   1/2, matrix(c(1,-2,3,1),ncol=2), c(0,0), "logit")
-mu = computeMu(io$X, io$Y, list(K=2))
+mu <- computeMu(io$X, io$Y, list(K=2))
 o <- optimParams(io$X, io$Y, 2, "logit")
 \donttest{
 theta0 <- list(p=1/2, beta=mu, b=c(0,0))
