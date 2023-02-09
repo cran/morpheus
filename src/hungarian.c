@@ -112,7 +112,7 @@ void hungarian_free(hungarian_problem_t* p) {
 void hungarian_solve(hungarian_problem_t* p)
 {
   int i, j, m, n, k, l, t, q, unmatched;
-  double cost, s;
+  double s; //,cost
   int* col_mate;
   int* row_mate;
   int* parent_row;
@@ -122,7 +122,7 @@ void hungarian_solve(hungarian_problem_t* p)
   double* slack;
   int* slack_row;
 
-  cost = 0.;
+//  cost = 0.;
   m =p->num_rows;
   n =p->num_cols;
 
@@ -160,7 +160,7 @@ void hungarian_solve(hungarian_problem_t* p)
     for (k=1; k<m; k++)
       if (p->cost[k][l]<s)
         s=p->cost[k][l];
-    cost+=s;
+//    cost+=s;
     if (s!=0.)
       for (k=0; k<m; k++)
         p->cost[k][l]-=s;
@@ -335,11 +335,11 @@ done:
     }
     /*TRACE("\n");*/
   }
-  for (i=0; i<m; i++)
+/*  for (i=0; i<m; i++)
     cost+=row_dec[i];
   for (i=0; i<n; i++)
     cost-=col_inc[i];
-
+*/
   free(slack);
   free(col_inc);
   free(parent_row);

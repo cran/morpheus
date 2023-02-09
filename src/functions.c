@@ -1,5 +1,5 @@
 #include <stdlib.h>
-#include <omp.h>
+//#include <omp.h>
 
 // Index matrix (by columns)
 #define mi(i, j, d1, d2) (j*d1 + i)
@@ -53,7 +53,7 @@ void Moments_M3(double* X, double* Y, int* pn, int* pd, double* M3)
 // with g(Zi, theta) = i-th contribution to all moments (size dim) - real moments
 void Compute_Omega(double* X, int* Y, double* M, int* pnc, int* pn, int* pd, double* W)
 {
-  int nc=*pnc, n=*pn, d=*pd;
+  int n=*pn, d=*pd; //,nc=*pnc
   int dim = d + d*d + d*d*d;
   //double* W = (double*)malloc(dim*dim*sizeof(double));
 
@@ -101,7 +101,7 @@ void Compute_Omega(double* X, int* Y, double* M, int* pnc, int* pn, int* pd, dou
       // This final nested loop is very costly. Some basic optimisations:
       double gj = g[j];
       int baseIdx = j * dim;
-      #pragma GCC unroll 32
+//      #pragma GCC unroll 32
       for (int k=j; k>=0; k--)
         W[baseIdx+k] += gj * g[k];
     }
